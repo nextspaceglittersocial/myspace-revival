@@ -1,174 +1,167 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>MySpace Revival V3 💿</title>
-
+<title>SceneSpace 💿</title>
 <style>
-
 body {
 
-  margin: 0;
+margin: 0;
 
-  font-family: Verdana;
+font-family: Verdana;
 
-  background: linear-gradient(#ffb6f0, #000);
+background: linear-gradient(#ffb6f0, #000);
 
-  color: white;
+color: white;
 
 }
 
 header {
 
-  text-align: center;
+text-align: center;
 
-  padding: 10px;
+padding: 10px;
 
-  background: black;
+background: black;
 
-  border-bottom: 3px solid hotpink;
+border-bottom: 3px solid hotpink;
 
 }
 
 .container {
 
-  max-width: 500px;
+max-width: 500px;
 
-  margin: auto;
+margin: auto;
 
-  padding: 10px;
+padding: 10px;
 
 }
 
 .card {
 
-  background: rgba(0,0,0,0.75);
+background: rgba(0,0,0,0.75);
 
-  border: 2px solid hotpink;
+border: 2px solid hotpink;
 
-  padding: 10px;
+padding: 10px;
 
-  margin-top: 10px;
+margin-top: 10px;
 
 }
 
 input, button {
 
-  width: 100%;
+width: 100%;
 
-  padding: 10px;
+padding: 10px;
 
-  margin-top: 5px;
+margin-top: 5px;
 
 }
 
 button {
 
-  background: hotpink;
+background: hotpink;
 
-  border: none;
+border: none;
 
-  color: white;
+color: white;
 
 }
 
 .post {
 
-  background: rgba(255,255,255,0.1);
+background: rgba(255,255,255,0.1);
 
-  padding: 8px;
+padding: 8px;
 
-  margin-top: 5px;
+margin-top: 5px;
 
 }
 
 </style>
-
 </head>
-
 <body>
-
 <header>
-
-<h2>💿 MYSPACE REVIVAL V3 💿</h2>
-
+<h2>💿 SCENESPACE 💿</h2>
 </header>
-
 <div class="container">
-
 <!-- AUTH -->
-
 <div class="card" id="auth">
+<h3>Sign Up / Login</h3>
+<input id="email" placeholder="email">
+<input id="password" placeholder="password" type="password">
+<button onclick="signup()">Sign Up</button>
 
-  <h3>Sign Up / Login</h3>
-
-  <input id="email" placeholder="email">
-
-  <input id="password" placeholder="password" type="password">
-
-  <button onclick="signup()">Sign Up</button>
-
-  <button onclick="login()">Login</button>
+<button onclick="login()">Login</button>
 
 </div>
-
 <!-- PROFILE -->
-
 <div class="card" id="profile" style="display:none;">
-
-  <h3 id="userDisplay"></h3>
-
-  <input id="bio" placeholder="write your bio">
-
-  <button onclick="saveBio()">Save Profile</button>
-
+<h3 id="userDisplay"></h3>
 </div>
-
 <!-- POST -->
-
 <div class="card" id="postBox" style="display:none;">
-
-  <input id="postInput" placeholder="what’s on your mind?">
-
-  <button onclick="createPost()">Post</button>
+<input id="postInput" placeholder="what’s on your mind?">
+<button onclick="createPost()">Post</button>
 
 </div>
-
 <!-- FEED -->
-
 <div class="card" id="feed" style="display:none;">
-
-  <h3>🔥 Feed</h3>
-
-  <div id="posts"></div>
-
+<h3>🔥 Feed</h3>
+<div id="posts"></div>
 </div>
-
 </div>
-
+<!-- 💿 JAVASCRIPT + FIREBASE GOES HERE (IMPORTANT) -->
 <script type="module">
+// ================= FIREBASE IMPORTS =================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
 
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+getAuth,
 
-/* 🔥 YOUR FIREBASE CONFIG GOES HERE */
+createUserWithEmailAndPassword,
+
+signInWithEmailAndPassword
+
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+
+getFirestore,
+
+collection,
+
+addDoc,
+
+getDocs,
+
+query,
+
+orderBy
+
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ================= FIREBASE CONFIG =================
+
+// 🔥 REPLACE THIS WITH YOUR OWN FIREBASE CONFIG
 
 const firebaseConfig = {
 
-  apiKey: "YOUR_KEY",
+apiKey: "YOUR_API_KEY",
 
-  authDomain: "YOUR_DOMAIN",
+authDomain: "YOUR_AUTH_DOMAIN",
 
-  projectId: "YOUR_PROJECT",
+projectId: "YOUR_PROJECT_ID",
+
+appId: "YOUR_APP_ID"
 
 };
+
+// ================= INIT =================
 
 const app = initializeApp(firebaseConfig);
 
@@ -178,96 +171,99 @@ const db = getFirestore(app);
 
 let currentUser = null;
 
-window.signup = async function(){
+// ================= AUTH =================
 
-  let email = document.getElementById("email").value;
+window.signup = async function () {
 
-  let pass = document.getElementById("password").value;
+let email = document.getElementById("email").value;
 
-  await createUserWithEmailAndPassword(auth, email, pass);
+let pass = document.getElementById("password").value;
 
-  login();
+let userCred = await createUserWithEmailAndPassword(auth, email, pass);
 
-}
+currentUser = userCred.user;
 
-window.login = async function(){
-
-  let email = document.getElementById("email").value;
-
-  let pass = document.getElementById("password").value;
-
-  let userCred = await signInWithEmailAndPassword(auth, email, pass);
-
-  currentUser = userCred.user;
-
-  document.getElementById("auth").style.display = "none";
-
-  document.getElementById("profile").style.display = "block";
-
-  document.getElementById("postBox").style.display = "block";
-
-  document.getElementById("feed").style.display = "block";
-
-  document.getElementById("userDisplay").innerText =
-
-    "Welcome 💿 " + currentUser.email;
-
-  loadPosts();
+enterApp();
 
 }
 
-window.saveBio = function(){
+window.login = async function () {
 
-  alert("Bio saved (you can expand this into Firestore profile storage)");
+let email = document.getElementById("email").value;
 
-}
+let pass = document.getElementById("password").value;
 
-window.createPost = async function(){
+let userCred = await signInWithEmailAndPassword(auth, email, pass);
 
-  let text = document.getElementById("postInput").value;
+currentUser = userCred.user;
 
-  await addDoc(collection(db, "posts"), {
-
-    user: currentUser.email,
-
-    text: text,
-
-    time: Date.now()
-
-  });
-
-  loadPosts();
+enterApp();
 
 }
 
-async function loadPosts(){
+// ================= ENTER APP =================
 
-  let q = query(collection(db, "posts"), orderBy("time", "desc"));
+function enterApp() {
 
-  let snap = await getDocs(q);
+document.getElementById("auth").style.display = "none";
 
-  let container = document.getElementById("posts");
+document.getElementById("profile").style.display = "block";
 
-  container.innerHTML = "";
+document.getElementById("postBox").style.display = "block";
 
-  snap.forEach(doc => {
+document.getElementById("feed").style.display = "block";
 
-    let p = doc.data();
+document.getElementById("userDisplay").innerText =
 
-    let div = document.createElement("div");
+"Welcome 💿 " + currentUser.email;
+loadPosts();
 
-    div.className = "post";
+}
 
-    div.innerHTML = "<b>" + p.user + "</b><br>" + p.text;
+// ================= POSTS =================
 
-    container.appendChild(div);
+window.createPost = async function () {
 
-  });
+let text = document.getElementById("postInput").value;
+
+if (!text) return;
+
+await addDoc(collection(db, "posts"), {
+
+user: currentUser.email,
+text: text,
+time: Date.now()
+});
+
+document.getElementById("postInput").value = "";
+
+loadPosts();
+
+}
+
+// ================= LOAD FEED =================
+
+async function loadPosts() {
+
+let q = query(collection(db, "posts"), orderBy("time", "desc"));
+
+let snap = await getDocs(q);
+
+let container = document.getElementById("posts");
+
+container.innerHTML = "";
+
+snap.forEach(doc => {
+
+let p = doc.data();
+let div = document.createElement("div");
+div.className = "post";
+div.innerHTML = "<b>" + p.user + "</b><br>" + p.text;
+container.appendChild(div);
+});
 
 }
 
 </script>
-
 </body>
-
 </html>
